@@ -1,0 +1,27 @@
+[package]
+name = "notchsend-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+notchsend-protocol = { path = "../protocol" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+sha2 = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+hyper = { version = "1", features = ["server", "client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio", "client-legacy"] }
+http-body-util = "0.1"
+bytes = "1"
+futures-util = "0.3"
+rustls = { version = "0.23", features = ["ring", "tls12"] }
+tokio-rustls = "0.26"
+rustls-pki-types = "1"
+rcgen = "0.13"
+rsa = { version = "0.9", features = ["pem"] }
+socket2 = { version = "0.5", features = ["all"] }
+mime_guess = "2"
