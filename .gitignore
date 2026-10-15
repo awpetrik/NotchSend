@@ -1,0 +1,12 @@
+# Rust build output (the daemon workspace target dir is ~1.5 GB)
+/notchsend/target/
+target/
+
+# Swift app build output (app/build.sh writes NotchSend.app here)
+/app/build/
+
+# Mockup preview screenshot (render artifact, regenerable from index.html)
+/mockups/preview-top.png
+
+# macOS noise
+.DS_Store
