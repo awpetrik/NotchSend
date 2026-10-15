@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NotchSend - Mockup per Action</title>
+<style>
+  :root{
+    --page:#e9e9ec; --ink:#1d1d1f; --sub:#6e6e73; --card:#fff;
+    --blue:#0a84ff; --green:#30d158; --red:#ff453a; --amber:#ffd60a;
+    --notch:#000; --notch-text:#f5f5f7; --notch-sub:#a1a1a6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+       background:var(--page); color:var(--ink); padding:40px 28px 80px;}
+  header{max-width:1180px; margin:0 auto 28px;}
+  header h1{font-size:30px; font-weight:700; letter-spacing:-.02em;}
+  header p{color:var(--sub); margin-top:6px; font-size:15px; max-width:760px; line-height:1.5;}
+  header .note{margin-top:10px; font-size:13px; color:var(--sub);}
+  .grid{max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+  .group{max-width:1180px; margin:34px auto 14px; font-size:13px; font-weight:700;
+         letter-spacing:.08em; text-transform:uppercase; color:var(--sub);}
+  .card{background:var(--card); border-radius:18px; padding:18px 18px 16px;
+        box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .card h3{font-size:16px; font-weight:600;}
+  .card h3 .id{color:var(--blue); font-weight:700; margin-right:6px;}
+  .trigger{font-size:12.5px; color:var(--sub); margin:4px 0 12px; line-height:1.45;}
+  .trigger code{background:#f2f2f7; border-radius:5px; padding:1px 5px; font-size:12px;
+        font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#333;}
+  .desc{font-size:13px; color:#3a3a3c; line-height:1.55; margin-top:12px;}
+  .desc li{margin-left:18px; margin-top:3px;}
+
+  /* ---- simulated screen top ---- */
+  .stage{position:relative; height:300px; border-radius:var(--radius); overflow:hidden;
+         background:linear-gradient(160deg,#3a4a7a 0%,#7a4a6e 45%,#c96f4a 100%);}
+  .stage.tall{height:360px;}
+  .stage.short{height:170px;}
+  .menubar{position:absolute; top:0; left:0; right:0; height:30px;
+           background:rgba(255,255,255,.22); backdrop-filter:blur(8px);
+           display:flex; justify-content:space-between; align-items:center;
+           padding:0 14px; font-size:12px; color:#fff;}
+  .menubar .mb-left,.menubar .mb-right{display:flex; gap:14px; align-items:center; opacity:.95;}
+
+  /* ---- notch shapes ---- */
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%);
+         background:var(--notch); color:var(--notch-text);}
+  .cam{position:absolute; top:7px; left:50%; transform:translateX(-50%);
+       width:10px; height:10px; border-radius:50%; background:#1c1c1e;
+       box-shadow:inset 0 0 2px 1px #0a2a4a;}
+  /* minimal live activity: notch widens sideways */
+  .n-min{width:360px; height:40px; border-radius:0 0 22px 22px;
+         display:flex; align-items:center; padding:0 16px; gap:10px;}
+  /* temporary card: slightly taller minimal */
+  .n-card{width:400px; border-radius:0 0 24px 24px; padding:12px 16px 14px;}
+  /* expanded */
+  .n-exp{width:580px; max-width:94%; border-radius:0 0 30px 30px; padding:16px 20px 18px;}
+  .row{display:flex; align-items:center; gap:10px;}
+  .row.between{justify-content:space-between;}
+  .grow{flex:1; min-width:0;}
+  .t-title{font-size:14.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .t-sub{font-size:12px; color:var(--notch-sub); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .t-pct{font-size:14px; font-weight:600; font-variant-numeric:tabular-nums;}
+  .t-rate{font-size:11.5px; color:var(--notch-sub); font-variant-numeric:tabular-nums;}
+  .ic{flex:none; display:inline-flex; align-items:center; justify-content:center;}
+  .ic svg{display:block;}
+  .bar{height:5px; border-radius:3px; background:#3a3a3c; overflow:hidden; margin-top:7px;}
+  .bar > i{display:block; height:100%; border-radius:3px; background:var(--blue);}
+  .bar.green > i{background:var(--green);}
+  .btn{border:0; cursor:pointer; font:inherit; font-size:13.5px; font-weight:600;
+       border-radius:980px; padding:8px 20px; min-height:36px;}
+  .btn-primary{background:var(--blue); color:#fff;}
+  .btn-ghost{background:#2c2c2e; color:var(--notch-text);}
+  .btn-danger{background:#2c2c2e; color:var(--red);}
+  .btn-green{background:var(--green); color:#06280f;}
+  .chip{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+        border-radius:980px; padding:3px 9px; background:#2c2c2e; color:var(--notch-sub);}
+  .chip.warn{background:#3a2f04; color:var(--amber);}
+  .chip.err{background:#3d0a08; color:var(--red);}
+  .chip.ok{background:#0a2e14; color:var(--green);}
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--green); flex:none;}
+  .dot.off{background:#636366;}
+  .dot.warn{background:var(--amber);}
+  .files{margin-top:12px; border-top:.5px solid #2c2c2e; }
+  .file{display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:.5px solid #2c2c2e;}
+  .file:last-child{border-bottom:0;}
+  .file .fname{font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .file .fmeta{font-size:11.5px; color:var(--notch-sub); font-variant-numeric:tabular-nums;}
+  .actions{display:flex; gap:10px; margin-top:14px;}
+  .actions .btn{flex:1;}
+  .countdown{font-size:12px; color:var(--amber); font-weight:600; font-variant-numeric:tabular-nums;}
+  .peer{display:flex; align-items:center; gap:12px; padding:11px 10px; border-radius:12px; cursor:pointer;}
+  .peer:hover{background:#1c1c1e;}
+  .peer.off{opacity:.42; cursor:default;}
+  .peer .pname{font-size:14px; font-weight:600;}
+  .peer .pmeta{font-size:11.5px; color:var(--notch-sub);}
+  .peer .go{margin-left:auto; color:var(--notch-sub); font-size:12px;}
+  .pin{display:flex; gap:8px; margin-top:12px;}
+  .pin span{width:44px; height:52px; border-radius:10px; background:#1c1c1e;
+            border:1px solid #3a3a3c; display:flex; align-items:center; justify-content:center;
+            font-size:20px; font-weight:600;}
+  .pin span.cur{border-color:var(--blue);}
+  .dropzone{margin:10px 6px 4px; border:1.5px dashed #48484a; border-radius:16px;
+            padding:20px 10px; text-align:center; color:var(--notch-sub); font-size:13px;}
+  .spin{width:16px;height:16px;border-radius:50%;border:2px solid #3a3a3c;border-top-color:#fff;
+        animation:rot 1s linear infinite; flex:none;}
+  @keyframes rot{to{transform:rotate(360deg)}}
+  .kbd{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; background:#2c2c2e;
+       border-radius:5px; padding:1px 6px;}
+  footer{max-width:1180px; margin:36px auto 0; color:var(--sub); font-size:13px; line-height:1.6;}
+</style>
+</head>
+<body>
+<header>
+  <h1>NotchSend: mockup di setiap action</h1>
+  <p>16 state yang dirender persis seperti posisi aslinya: nempel di notch fisik MacBook Air, di bawah menu bar.
+     Semua angka, nama file, dan nama device di halaman ini <b>data contoh</b> buat review visual, bukan data asli.</p>
+  <p class="note">Arah visual ngikutin DynamicNotch apa adanya: permukaan hitam notch, teks putih, biru sistem cuma buat aksi utama dan progress, warna lain cuma buat status. Ikon pakai glyph sekelas SF Symbols, tidak ada emoji. Ukuran tombol aksi minimal 36px (Fitts), pilihan peer dibatasi yang online di atas (Hick), dan state yang lagi jalan selalu kelihatan tanpa buka window (visibility of system status).</p>
+</header>
+
+<div class="group">Terima file</div>
+<div class="grid">
+
+  <!-- M01 -->
+  <section class="card">
+    <h3><span class="id">M01</span>Konfirmasi terima (expanded)</h3>
+    <p class="trigger">Trigger: event daemon <code>incoming_request</code>. Satu-satunya state yang boleh expand sendiri, karena pengirim lagi diblokir nunggu jawaban. Sticky sampai dijawab atau 60 detik habis.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span><span>Edit</span></div><div class="mb-right"><span>Rab 13 Okt</span><span>15.42</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row">
+          <span class="ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4L8 9" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#0a84ff" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <div class="grow">
+            <div class="t-title">Pixel 9 mau kirim 3 file</div>
+            <div class="t-sub">Total 5,0 MB, ke Downloads</div>
+          </div>
+          <span class="countdown">00:47</span>
+        </div>
+        <div class="files">
+          <div class="file"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#a1a1a6" stroke-width="1.8"/><circle cx="9" cy="9" r="1.6" fill="#a1a1a6"/><path d="m5 19 5.5-5.5 3 3L17 13l2 2" stroke="#a1a1a6" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+            <div class="grow"><div class="fname">IMG_2041.jpg</div></div><span class="fmeta">4,8 MB</span></div>
+          <div class="file"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#a1a1a6" stroke-width="1.8"/><path d="M14 3v5h5" stroke="#a1a1a6" stroke-width="1.8"/></svg></span>
+            <div class="grow"><div class="fname">notes.pdf</div></div><span class="fmeta">184 KB</span></div>
+          <div class="file"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#a1a1a6" stroke-width="1.8"/><path d="M14 3v5h5" stroke="#a1a1a6" stroke-width="1.8"/></svg></span>
+            <div class="grow"><div class="fname">+1 file lain</div></div><span class="fmeta">12 KB</span></div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost">Tolak</button>
+          <button class="btn btn-primary">Terima 3 file</button>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Countdown kelihatan terus. Habis waktu = otomatis ditolak, tanpa kartu error (M14).</li>
+      <li>Daftar file maksimal 3 baris + ringkasan sisanya, biar panel tidak pernah lebih tinggi dari ~300px.</li>
+      <li>Varian: kalau pengirim minta PIN dan PIN salah, panel ini tidak muncul sama sekali, daemon langsung balas 401 ke pengirim.</li>
+    </ul>
+  </section>
+
+  <!-- M02 -->
+  <section class="card">
+    <h3><span class="id">M02</span>Terima berjalan (minimal)</h3>
+    <p class="trigger">Trigger: <code>session_started</code> + <code>progress</code>. Live activity: notch melebar secukupnya, ini yang kelihatan 95% waktu transfer.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.42</span></div></div>
+      <div class="notch n-min"><div class="cam"></div>
+        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3v10m0 0 4-4m-4 4L8 9" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+        <div class="grow">
+          <div class="row between"><span class="t-title" style="font-size:13px;">IMG_2041.jpg</span><span class="t-pct" style="font-size:13px;">44%</span></div>
+          <div class="bar" style="margin-top:4px;"><i style="width:44%"></i></div>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Isi: ikon arah, nama file aktif, persen, progress bar. Rate sengaja tidak ditampilkan di mode minimal, terlalu ramai buat lebar segini. Rate muncul di M03.</li>
+      <li>Update maksimal 10x/detik dari daemon, bar tidak pernah mundur.</li>
+    </ul>
+  </section>
+
+  <!-- M03 -->
+  <section class="card">
+    <h3><span class="id">M03</span>Terima berjalan (expanded)</h3>
+    <p class="trigger">Trigger: hover / klik M02. Detail per file + tombol batalkan.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.42</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row between">
+          <div>
+            <div class="t-title">Menerima dari Pixel 9</div>
+            <div class="t-sub">2,4 MB dari 5,0 MB, 18,3 MB/dtk, sisa ~1 dtk</div>
+          </div>
+          <span class="t-pct">44%</span>
+        </div>
+        <div class="bar"><i style="width:44%"></i></div>
+        <div class="files">
+          <div class="file">
+            <div class="grow"><div class="fname">IMG_2041.jpg</div><div class="bar" style="margin-top:5px;"><i style="width:50%"></i></div></div>
+            <span class="fmeta">2,4 / 4,8 MB</span>
+          </div>
+          <div class="file">
+            <div class="grow"><div class="fname">notes.pdf</div><div class="t-sub">Menunggu giliran</div></div>
+            <span class="fmeta">184 KB</span>
+          </div>
+          <div class="file">
+            <div class="grow"><div class="fname">rekap.txt</div><div class="t-sub">Menunggu giliran</div></div>
+            <span class="fmeta">12 KB</span>
+          </div>
+        </div>
+        <div class="actions"><button class="btn btn-danger">Batalkan transfer</button></div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Batalkan di sini mengirim <code>cancel</code> ke daemon: file <span class="kbd">.part</span> dihapus, file yang sudah selesai &amp; terverifikasi tetap disimpan.</li>
+      <li>File yang lagi diverifikasi SHA-256 labelnya berubah jadi "Memeriksa…", bukan bar diam tanpa penjelasan.</li>
+    </ul>
+  </section>
+
+  <!-- M04 -->
+  <section class="card">
+    <h3><span class="id">M04</span>Selesai terima</h3>
+    <p class="trigger">Trigger: <code>session_completed</code>. Temporary card, hilang sendiri dalam 4 detik.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.43</span></div></div>
+      <div class="notch n-card" style="width:460px;"><div class="cam"></div>
+        <div class="row">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#30d158"/><path d="m8 12.5 2.6 2.6L16 9.5" stroke="#06280f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div class="grow">
+            <div class="t-title">3 file diterima dari Pixel 9</div>
+            <div class="t-sub">IMG_2041.jpg dan 2 lainnya, di Downloads</div>
+          </div>
+          <button class="btn btn-ghost" style="min-height:32px; padding:6px 14px;">Lihat di Finder</button>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Klik kartu atau tombolnya membuka Finder di file pertama. Klik di mana pun selain tombol juga sama, area kliknya besar.</li>
+      <li>Kalau user lagi ngetik / presentasi, kartu tetap muncul tapi tidak mencuri fokus keyboard. Ini panel non-activating.</li>
+    </ul>
+  </section>
+</div>
+
+<div class="group">Kirim file</div>
+<div class="grid">
+
+  <!-- M05 -->
+  <section class="card">
+    <h3><span class="id">M05</span>Drag &amp; drop ke notch</h3>
+    <p class="trigger">Trigger: user menyeret file dari Finder ke arah notch. Overlay bawaan DynamicNotch, ditambah label LocalSend.</p>
+    <div class="stage">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.44</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="dropzone">
+          <span class="ic" style="margin-bottom:6px;"><svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 15V4m0 0L8 8m4-4 4 4" stroke="#f5f5f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#f5f5f7" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <div style="color:#f5f5f7; font-weight:600; font-size:14px;">Lepas buat kirim 2 file</div>
+          <div style="margin-top:3px;">laporan-q3.pdf, foto-toko.jpg, total 8,1 MB</div>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Jumlah &amp; total ukuran dihitung dari drag payload sebelum dilepas, jadi user yakin file yang kebawa benar.</li>
+      <li>Lepas di luar notch = tidak terjadi apa-apa. Tidak ada mode "file nyangkut" di notch.</li>
+    </ul>
+  </section>
+
+  <!-- M06 -->
+  <section class="card">
+    <h3><span class="id">M06</span>Pilih peer tujuan</h3>
+    <p class="trigger">Trigger: file dilepas di notch, atau klik "Kirim file" di M15. Daftar dari peer registry daemon.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.44</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row between">
+          <div class="t-title">Kirim 2 file ke…</div>
+          <span class="chip">8,1 MB</span>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="peer">
+            <span class="dot"></span>
+            <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="7" y="2.5" width="10" height="19" rx="2.5" stroke="#f5f5f7" stroke-width="1.8"/><path d="M10.5 5h3" stroke="#f5f5f7" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <div><div class="pname">Pixel 9</div><div class="pmeta">Android, 192.168.1.14</div></div>
+            <span class="go">Kirim</span>
+          </div>
+          <div class="peer">
+            <span class="dot"></span>
+            <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="4.5" width="18" height="12" rx="2" stroke="#f5f5f7" stroke-width="1.8"/><path d="M2 20h20" stroke="#f5f5f7" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <div><div class="pname">PC Kantor</div><div class="pmeta">Windows, 192.168.1.20</div></div>
+            <span class="go">Kirim</span>
+          </div>
+          <div class="peer off">
+            <span class="dot off"></span>
+            <span class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="7" y="2.5" width="10" height="19" rx="2.5" stroke="#f5f5f7" stroke-width="1.8"/><path d="M10.5 5h3" stroke="#f5f5f7" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <div><div class="pname">iPhone Soleh</div><div class="pmeta">Terakhir terlihat 12 menit lalu</div></div>
+          </div>
+        </div>
+        <div class="actions"><button class="btn btn-ghost">Batal</button></div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Peer offline tetap ditampilkan tapi redup &amp; tidak bisa diklik, biar user tahu device-nya pernah ada dan sekarang hilang, bukan daftar kosong yang membingungkan.</li>
+      <li>Baris peer tingginya 52px, target klik besar. Urutan: yang paling baru terlihat di atas.</li>
+      <li>State kosong (tidak ada peer sama sekali): panel yang sama, isinya satu baris "Tidak ada device di jaringan ini" + tombol "Pindai ulang".</li>
+    </ul>
+  </section>
+
+  <!-- M07 -->
+  <section class="card">
+    <h3><span class="id">M07</span>Menyiapkan file (hashing)</h3>
+    <p class="trigger">Trigger: state sesi <code>preparing</code>. Daemon membaca file buat hitung SHA-256 sebelum <code>prepare-upload</code>.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.45</span></div></div>
+      <div class="notch n-min" style="width:440px;"><div class="cam"></div>
+        <span class="spin"></span>
+        <div class="grow">
+          <div class="t-title" style="font-size:13px;">Menyiapkan file…</div>
+          <div class="t-sub">video-acara.mp4, 1,2 GB, menghitung checksum</div>
+        </div>
+        <button class="btn btn-ghost" style="min-height:28px; padding:4px 12px; font-size:12px;">Batal</button>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>State ini cuma terasa di file besar. File kecil langsung lompat ke M08, panel ini tidak sempat dirender (tidak ada flash spinner).</li>
+      <li>Kenapa ditampilkan jujur: tanpa ini, kirim file 1 GB kelihatan macet beberapa detik padahal lagi kerja.</li>
+    </ul>
+  </section>
+
+  <!-- M08 -->
+  <section class="card">
+    <h3><span class="id">M08</span>Menunggu peer menerima</h3>
+    <p class="trigger">Trigger: <code>prepare-upload</code> terkirim, daemon nunggu jawaban peer. Cerminan M01 tapi di sisi pengirim.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.45</span></div></div>
+      <div class="notch n-min" style="width:440px;"><div class="cam"></div>
+        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#a1a1a6" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="#a1a1a6" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <div class="grow">
+          <div class="t-title" style="font-size:13px;">Menunggu Pixel 9 menerima…</div>
+          <div class="t-sub">2 file, 8,1 MB, belum dijawab</div>
+        </div>
+        <button class="btn btn-ghost" style="min-height:28px; padding:4px 12px; font-size:12px;">Batal</button>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Peer menolak (403) = langsung jadi kartu gagal M13 varian "Ditolak oleh Pixel 9". Peer diam saja = timeout di sisi peer, berakhir sebagai M13 "Tidak dijawab".</li>
+    </ul>
+  </section>
+
+  <!-- M09 -->
+  <section class="card">
+    <h3><span class="id">M09</span>Peer minta PIN</h3>
+    <p class="trigger">Trigger: peer balas 401 waktu <code>prepare-upload</code>. Expanded karena butuh input keyboard.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.46</span></div></div>
+      <div class="notch n-exp" style="width:480px;"><div class="cam"></div>
+        <div class="row">
+          <span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="2" stroke="#ffd60a" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#ffd60a" stroke-width="2"/></svg></span>
+          <div class="grow">
+            <div class="t-title">PC Kantor minta PIN</div>
+            <div class="t-sub">PIN yang diatur di device tujuan, lalu Enter buat kirim ulang</div>
+          </div>
+        </div>
+        <div class="pin"><span>4</span><span>8</span><span class="cur">&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span><span>&nbsp;</span></div>
+        <div class="actions">
+          <button class="btn btn-ghost">Batal</button>
+          <button class="btn btn-primary">Kirim dengan PIN</button>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Panel ini satu-satunya state LocalSend yang mengambil fokus keyboard, dan itu memang harus: PIN tidak bisa diklik. Esc = batal.</li>
+      <li>PIN salah 3x: peer ngasih 429, panel berubah jadi pesan kunci sementara (varian M13), PIN tidak disimpan di mana pun.</li>
+    </ul>
+  </section>
+
+  <!-- M10 -->
+  <section class="card">
+    <h3><span class="id">M10</span>Kirim berjalan (minimal)</h3>
+    <p class="trigger">Trigger: <code>session_started</code> arah keluar + <code>progress</code>. Pasangan M02, beda ikon arah &amp; label tujuan.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.46</span></div></div>
+      <div class="notch n-min"><div class="cam"></div>
+        <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 13V3m0 0L8 7m4-4 4 4" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="#0a84ff" stroke-width="2.2" stroke-linecap="round"/></svg></span>
+        <div class="grow">
+          <div class="row between"><span class="t-title" style="font-size:13px;">Ke Pixel 9: laporan-q3.pdf</span><span class="t-pct" style="font-size:13px;">67%</span></div>
+          <div class="bar" style="margin-top:4px;"><i style="width:67%"></i></div>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Konvensi konsisten: panah ke bawah = masuk, panah ke atas = keluar, di semua state. User tidak perlu baca teks buat tahu arah transfer.</li>
+    </ul>
+  </section>
+
+  <!-- M11 -->
+  <section class="card">
+    <h3><span class="id">M11</span>Kirim berjalan (expanded)</h3>
+    <p class="trigger">Trigger: hover / klik M10. Layout identik M03 dengan arah dibalik, biar dua arah terasa satu produk.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.46</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row between">
+          <div>
+            <div class="t-title">Mengirim ke Pixel 9</div>
+            <div class="t-sub">5,4 MB dari 8,1 MB, 21,0 MB/dtk, sisa ~1 dtk</div>
+          </div>
+          <span class="t-pct">67%</span>
+        </div>
+        <div class="bar"><i style="width:67%"></i></div>
+        <div class="files">
+          <div class="file">
+            <div class="grow"><div class="fname">laporan-q3.pdf</div><div class="bar" style="margin-top:5px;"><i style="width:100%"></i></div></div>
+            <span class="fmeta" style="color:#30d158;">Selesai</span>
+          </div>
+          <div class="file">
+            <div class="grow"><div class="fname">foto-toko.jpg</div><div class="bar" style="margin-top:5px;"><i style="width:38%"></i></div></div>
+            <span class="fmeta">1,1 / 2,9 MB</span>
+          </div>
+        </div>
+        <div class="actions"><button class="btn btn-danger">Batalkan transfer</button></div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Dua file bisa jalan paralel (konkurensi 2 ngikutin app official), bar per file bergerak bareng, bar agregat di atas merangkumnya.</li>
+      <li>Batalkan di tengah file ke-2: file ke-1 yang sudah diterima peer tetap di sana, dan M12/M13 menyebutkan itu apa adanya.</li>
+    </ul>
+  </section>
+</div>
+
+<div class="group">Selesai, gagal, dan sistem</div>
+<div class="grid">
+
+  <!-- M12 -->
+  <section class="card">
+    <h3><span class="id">M12</span>Selesai kirim</h3>
+    <p class="trigger">Trigger: <code>session_completed</code> arah keluar. Temporary card 4 detik, tanpa tombol (tidak ada Finder yang perlu dibuka di sisi pengirim).</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.47</span></div></div>
+      <div class="notch n-card"><div class="cam"></div>
+        <div class="row">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#30d158"/><path d="m8 12.5 2.6 2.6L16 9.5" stroke="#06280f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <div class="grow">
+            <div class="t-title">Terkirim ke Pixel 9</div>
+            <div class="t-sub">2 file, 8,1 MB, dalam 6 detik</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Durasi total ditampilkan karena itu yang user rasakan ("kok cepet/lama"), bukan kecepatan puncak yang tidak ada gunanya.</li>
+    </ul>
+  </section>
+
+  <!-- M13 -->
+  <section class="card">
+    <h3><span class="id">M13</span>Gagal (3 varian teks)</h3>
+    <p class="trigger">Trigger: <code>session_failed</code>. Satu layout, teks alasan plain dari daemon, tidak ada kode error mentah. Temporary card 5 detik.</p>
+    <div class="stage">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.47</span></div></div>
+      <div class="notch n-card"><div class="cam"></div>
+        <div class="row">
+          <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ff453a"/><path d="M12 7v6" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.4" r="1.3" fill="#fff"/></svg></span>
+          <div class="grow">
+            <div class="t-title">Koneksi ke Pixel 9 putus</div>
+            <div class="t-sub">1 dari 3 file sempat diterima. Kirim ulang buat melanjutkan sisanya.</div>
+          </div>
+          <button class="btn btn-ghost" style="min-height:32px; padding:6px 14px;">Kirim ulang</button>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Varian teks lain, layout sama: <b>"Ditolak oleh Pixel 9"</b> (403), <b>"Ruang disk tidak cukup"</b> (di Mac ini atau di tujuan), <b>"Checksum tidak cocok, file ditolak"</b> (422), <b>"Pixel 9 tidak menjawab"</b> (timeout).</li>
+      <li>Tombol "Kirim ulang" cuma muncul di arah kirim dan cuma buat file yang belum terkirim. Di arah terima, kartu gagal tidak punya tombol, cuma informasi.</li>
+      <li>Sebagian berhasil selalu disebut jumlahnya. Tidak ada state "gagal total" palsu kalau 2 dari 3 file sebenarnya sudah sampai.</li>
+    </ul>
+  </section>
+
+  <!-- M14 -->
+  <section class="card">
+    <h3><span class="id">M14</span>Dibatalkan / request kedaluwarsa</h3>
+    <p class="trigger">Trigger: <code>session_cancelled</code> atau <code>request_expired</code>. Sengaja hampir tidak terlihat: ini bukan error.</p>
+    <div class="stage short">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.48</span></div></div>
+      <div class="notch n-min" style="width:320px;"><div class="cam"></div>
+        <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#a1a1a6" stroke-width="2"/><path d="m9 9 6 6m0-6-6 6" stroke="#a1a1a6" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span class="t-title" style="font-size:13px; color:#a1a1a6;">Transfer dibatalkan</span>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Muncul 2 detik lalu hilang. Request kedaluwarsa bahkan lebih senyap: panel M01 langsung menutup tanpa kartu ini, karena user sendiri yang memilih tidak menjawab.</li>
+      <li>Kedaluwarsa tetap dicatat daemon di log + riwayat M15, jadi bukan hilang tanpa jejak.</li>
+    </ul>
+  </section>
+
+  <!-- M15 -->
+  <section class="card">
+    <h3><span class="id">M15</span>Idle: halaman LocalSend di notch expanded</h3>
+    <p class="trigger">Trigger: user membuka notch dengan sengaja (hover/klik saat tidak ada aktivitas). Halaman ini rumahnya status daemon, peer, dan riwayat singkat.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.50</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row between">
+          <div class="row" style="gap:8px;">
+            <span class="dot"></span>
+            <div>
+              <div class="t-title">NotchSend aktif</div>
+              <div class="t-sub">Terlihat sebagai "Rivaldi's MacBook Air" di jaringan ini</div>
+            </div>
+          </div>
+          <span class="chip ok">Daemon jalan</span>
+        </div>
+        <div class="files">
+          <div class="file">
+            <span class="dot"></span>
+            <div class="grow"><div class="fname">Pixel 9</div><div class="t-sub">Android, terlihat barusan</div></div>
+            <button class="btn btn-primary" style="min-height:30px; padding:5px 14px; font-size:12.5px;">Kirim file</button>
+          </div>
+          <div class="file">
+            <span class="dot"></span>
+            <div class="grow"><div class="fname">PC Kantor</div><div class="t-sub">Windows, terlihat barusan</div></div>
+            <button class="btn btn-primary" style="min-height:30px; padding:5px 14px; font-size:12.5px;">Kirim file</button>
+          </div>
+          <div class="file">
+            <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#636366" stroke-width="1.8"/><path d="m8.5 12.2 2.4 2.4 4.6-5" stroke="#636366" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="grow"><div class="fname">Terakhir: 3 file dari Pixel 9</div><div class="t-sub">15.43, selesai tanpa masalah</div></div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost">Sembunyikan dari jaringan</button>
+          <button class="btn btn-ghost">Pengaturan</button>
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>"Kirim file" di sini membuka file picker macOS, lalu lanjut ke M06 dengan peer itu sudah terpilih.</li>
+      <li>"Sembunyikan dari jaringan" = <code>set_discoverable false</code>: daemon tetap jalan, berhenti announce, menolak prepare-upload. Status dot berubah abu dan label jadi "Tersembunyi".</li>
+      <li>Ini satu-satunya tempat toggle &amp; pengaturan tinggal. Notch tidak menampung settings lengkap.</li>
+    </ul>
+  </section>
+
+  <!-- M16 -->
+  <section class="card">
+    <h3><span class="id">M16</span>Daemon bermasalah (port / mati)</h3>
+    <p class="trigger">Trigger: <code>daemon_status</code> bermasalah, atau socket IPC tidak bisa dihubungi. Ditampilkan di halaman M15, bukan modal yang mengganggu.</p>
+    <div class="stage tall">
+      <div class="menubar"><div class="mb-left"><span></span><span>Finder</span><span>File</span></div><div class="mb-right"><span>15.51</span></div></div>
+      <div class="notch n-exp"><div class="cam"></div>
+        <div class="row between">
+          <div class="row" style="gap:8px;">
+            <span class="dot warn"></span>
+            <div>
+              <div class="t-title">Tidak bisa menerima file</div>
+              <div class="t-sub">Port 53317 dipakai aplikasi LocalSend yang lagi terbuka</div>
+            </div>
+          </div>
+          <span class="chip warn">Port bentrok</span>
+        </div>
+        <div class="desc" style="color:#a1a1a6; margin-top:12px; font-size:12.5px;">
+          Tutup aplikasi LocalSend, NotchSend akan mengambil alih port-nya sendiri dalam 30 detik. Mengirim file tetap bisa selama daemon jalan.
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost">Coba lagi sekarang</button>
+          <button class="btn btn-primary">Buka log daemon</button>
+        </div>
+        <div class="desc" style="color:#636366; margin-top:12px; font-size:12px;">
+          Varian lain, layout sama: "Daemon tidak jalan" (tombol: Jalankan daemon) / "Izin Local Network ditolak" (tombol: Buka Pengaturan Sistem) / "Daemon versi lama, lagi diperbarui" (tanpa tombol, hilang sendiri).
+        </div>
+      </div>
+    </div>
+    <ul class="desc">
+      <li>Tidak pernah muncul sebagai kartu yang menyela. User taunya dari dot status di M15 berubah kuning, dan dari ikon menu bar.</li>
+      <li>Daemon tetap retry bind port tiap 30 detik di belakang layar, sesuai blueprint §11.</li>
+    </ul>
+  </section>
+</div>
+
+<footer>
+  <p><b>Cara review:</b> koreksi per nomor (mis. "M01 tombol Tolak jangan abu, bikin sejajar", "M06 peer offline buang aja"). Nomor mockup ini yang nanti jadi acuan nama view di kode Swift: <span class="kbd">M01 = LocalSendConfirmView</span>, <span class="kbd">M02/M10 = LocalSendMinimalView</span>, <span class="kbd">M03/M11 = LocalSendExpandedView</span>, dan seterusnya.</p>
+  <p style="margin-top:8px;">Yang sengaja <b>tidak</b> ada mockup-nya: request masuk ke-2 saat lagi ada transfer (daemon langsung balas 409 ke pengirim, notch user tidak menampilkan apa-apa, pengirim yang melihat "sibuk"), dan notifikasi Lock Screen (di luar scope v1 di blueprint).</p>
+</footer>
+</body>
+</html>
