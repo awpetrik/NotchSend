@@ -1,0 +1,20 @@
+[package]
+name = "notchsend-daemon"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "notchsendd"
+path = "src/main.rs"
+
+[dependencies]
+notchsend-protocol = { path = "../protocol" }
+notchsend-core = { path = "../core" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
